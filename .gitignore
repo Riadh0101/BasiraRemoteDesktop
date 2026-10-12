@@ -1,0 +1,8 @@
+**/CMakeCache.txt
+**/CMakeFiles
+build
+checker
+abi-checker
+client/Android/Studio/release.properties
+*.jks
+*.keystore

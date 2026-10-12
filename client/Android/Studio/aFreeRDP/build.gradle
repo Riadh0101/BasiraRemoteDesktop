@@ -1,0 +1,73 @@
+apply plugin: 'com.android.application'
+android {
+    compileSdkVersion = rootProject.ext.compileApi
+    buildToolsVersion = rootProject.ext.toolsVersion
+
+    defaultConfig {
+        applicationId "com.basira.remote.desktop"
+        minSdkVersion rootProject.ext.minApi
+        targetSdkVersion rootProject.ext.targetApi
+        versionName = rootProject.ext.versionName
+        if (versionName.isEmpty())
+          versionName = androidGitVersion.name()
+
+        versionCode = rootProject.ext.versionCode
+        ndk {
+            abiFilters "arm64-v8a"
+        }
+
+        println 'VERSION_NAME:        ' + versionName
+        println 'VERSION_CODE:        ' + versionCode
+    }
+
+    splits {
+        abi {
+            enable false
+        }
+    }
+    
+    packagingOptions {
+        jniLibs {
+            useLegacyPackaging true
+        }
+    }
+
+    signingConfigs {
+        debug {
+            v1SigningEnabled true
+            v2SigningEnabled true
+        }
+        release {
+            storeFile file(RELEASE_STORE_FILE)
+            storePassword RELEASE_STORE_PASSWORD
+            keyAlias RELEASE_KEY_ALIAS
+            keyPassword RELEASE_KEY_PASSWORD
+            storeType "jks"
+            v1SigningEnabled true
+            v2SigningEnabled true
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            signingConfig signingConfigs.release
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.txt'
+        }
+        debug {
+            jniDebuggable true
+            signingConfig signingConfigs.debug
+        }
+        qa {
+            jniDebuggable true
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_11
+    }
+}
+
+dependencies {
+    implementation project(':freeRDPCore')
+}

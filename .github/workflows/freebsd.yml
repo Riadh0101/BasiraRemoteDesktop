@@ -1,0 +1,85 @@
+name: '[freebsd] architecture builds'
+on:
+  workflow_dispatch:
+    branches: [ master, stable* ]
+  schedule:
+    - cron: '30 5 * * SAT'
+
+jobs:
+  freebsd_job:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        freebsd-version: ["15.0", "14.4"]
+        ssl: ["openssl36", "openssl40"]
+    name: Build on FreeBSD ${{ matrix.freebsd-version }} with ${{ matrix.ssl || 'openssl' }}
+    env:
+      SSL: ${{ matrix.ssl }}
+    steps:
+    - uses: actions/checkout@v6
+    - name: Test in FreeBSD
+      id: test
+      uses: vmactions/freebsd-vm@v1
+      with:
+        release: ${{ matrix.freebsd-version }}
+        envs: 'SSL'
+        usesh: true
+        copyback: false
+        prepare: |
+          pkg install -y \
+            cmake \
+            ninja \
+            krb5-devel \
+            json-c \
+            libcjson \
+            fdk-aac \
+            libsoxr \
+            sdl2 \
+            sdl3 \
+            sdl2_ttf \
+            sdl2_image \
+            opus \
+            png \
+            webp \
+            openjpeg \
+            libjpeg-turbo \
+            opensc \
+            v4l_compat \
+            libv4l \
+            uriparser \
+            ffmpeg \
+            pulseaudio \
+            pcsc-lite \
+            cups \
+            opencl \
+            gsm \
+            influxpkg-config \
+            icu \
+            fusefs-libs3 \
+            ccache \
+            opencl-clang-llvm15 \
+            faac \
+            faad2 \
+            opus-tools \
+            openh264 \
+            alsa-lib \
+            cairo \
+            ocl-icd $SSL
+
+        run: |
+          export LD_LIBRARY_PATH=/usr/lib/clang/18/lib/freebsd
+          export CTEST_OUTPUT_ON_FAILURE=1
+          if [ "$SSL" == "libressl-devel" ];
+          then
+            export CMAKE_SSL="-DWITH_LIBRESSL=ON"
+          else
+            export CMAKE_SSL="-DWITH_LIBRESSL=OFF"
+          fi
+
+          cmake -GNinja \
+            -C ci/cmake-preloads/config-freebsd.txt \
+            -B ci-build \
+            -S . \
+            -DCMAKE_INSTALL_PREFIX=/tmp/ci-test $CMAKE_SSL
+          cmake --build ci-build --parallel $(nproc) --target install
+          cmake --build ci-build --parallel $(nproc) --target test

@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="yes">نعم</string>
+    <string name="no">لا</string>
+    <string name="cancel">إلغاء</string>
+    <string name="save">حفظ</string>
+    <string name="cont">متابعة</string>
+    <string name="login">تسجيل الدخول</string>
+    <string name="menu_search">بحث</string>
+    <string name="menu_about">حول التطبيق</string>
+    <string name="menu_help">مساعدة</string>
+    <string name="menu_new_bookmark">اتصال جديد</string>
+    <string name="menu_app_settings">الإعدادات</string>
+    <string name="menu_connect">اتصال</string>
+    <string name="menu_edit">تعديل</string>
+    <string name="menu_delete">حذف</string>
+    <string name="bookmark_export">مشاركة</string>
+    <string name="settings_cat_host">الخادم</string>
+    <string name="settings_label">الاسم</string>
+    <string name="settings_hostname">عنوان الخادم (IP/Host)</string>
+    <string name="settings_port">المنفذ (Port)</string>
+    <string name="settings_cat_credentials">بيانات الاعتماد</string>
+    <string name="settings_username">اسم المستخدم</string>
+    <string name="settings_password">كلمة المرور</string>
+    <string name="settings_domain">النطاق (Domain)</string>
+</resources>

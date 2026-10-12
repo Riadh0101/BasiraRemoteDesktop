@@ -1,0 +1,57 @@
+name: abi-checker
+on:
+  workflow_dispatch:
+    branches: [ master, stable* ]
+    inputs:
+      API_BASE_REF:
+        description: 'Base revision for ABI compatibility check'
+        required: true
+        default: '3.6.0'
+  pull_request:
+    branches: [ master, stable* ]
+  schedule:
+    - cron: '30 4 * * SUN'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    name: "Run ABI checker on ubuntu-latest"
+    steps:
+      - name: "Check out pull request"
+        if: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.event_name == 'pull_request'  }}
+        uses: suzuki-shunsuke/get-pr-action@v0.1.0
+        id: pr
+
+      - name: "Check out source"
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          ref: ${{steps.pr.outputs.merge_commit_sha}}
+
+      - name: "Prepare environment"
+        run: |
+          sudo apt-get update -q -y
+          sudo apt-get --fix-broken install -q -y
+          sudo apt-get install -q -y devscripts equivs abigail-tools \
+            clang \
+            pylint \
+            curl
+          ./packaging/scripts/prepare_deb_freerdp-nightly.sh
+          sudo mk-build-deps -i
+
+      - name: "Prepare configuration"
+        run: |
+          mkdir -p abi-checker
+          cp scripts/abi-diff.sh abi-checker/
+          echo "GITHUB_BASE_REF=$GITHUB_BASE_REF"
+          echo "GITHUB_HEAD_REF=$GITHUB_HEAD_REF"
+          echo "API_BASE_REF=${{ inputs.API_BASE_REF || '3.6.0' }}"
+          echo "HEAD=$(git rev-parse HEAD)"
+          echo "remotes=$(git remote -v)"
+
+      - name: "Run ABI check..."
+        env:
+          BASE_REF: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.event_name == 'workflow_dispatch' && inputs.API_BASE_REF || '3.6.0' }}
+        run: |
+          echo "BASE_REF=$BASE_REF"
+          ./abi-checker/abi-diff.sh $BASE_REF
