@@ -19,6 +19,7 @@
             android:title="@string/settings_colors"
             app:useSimpleSummaryProvider="true" />
         <ListPreference
+            android:defaultValue="fitscreen"
             android:entries="@array/resolutions_array"
             android:entryValues="@array/resolutions_values_array"
             android:key="bookmark.resolution"

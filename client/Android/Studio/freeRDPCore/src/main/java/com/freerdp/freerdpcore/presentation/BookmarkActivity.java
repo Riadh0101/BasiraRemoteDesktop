@@ -213,7 +213,7 @@ public class BookmarkActivity
 			{
 				screenPref.setSummaryProvider(preference -> {
 					SharedPreferences sp = getPreferenceManager().getSharedPreferences();
-					String res = sp.getString("bookmark.resolution", "800x600");
+					String res = sp.getString("bookmark.resolution", "fitscreen");
 					if ("automatic".equals(res))
 						res = getString(R.string.resolution_automatic);
 					else if ("custom".equals(res))
@@ -314,7 +314,7 @@ public class BookmarkActivity
 			{
 				resPref.setSummaryProvider(preference -> {
 					SharedPreferences sp = getPreferenceManager().getSharedPreferences();
-					String res = sp.getString("bookmark.resolution", "800x600");
+					String res = sp.getString("bookmark.resolution", "fitscreen");
 					if ("automatic".equals(res))
 						return getString(R.string.resolution_automatic);
 					if ("custom".equals(res))

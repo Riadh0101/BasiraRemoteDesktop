@@ -450,7 +450,15 @@ public class SessionInputManager
 
 	@Override public void onTouchPointerResetScrollZoom()
 	{
-		sessionView.setZoom(1.0f);
+		float fitScale = sessionView.getFitScale(scrollView.getWidth(), scrollView.getHeight());
+		if (Math.abs(sessionView.getZoom() - fitScale) < 0.05f)
+		{
+			sessionView.setZoom(1.0f);
+		}
+		else
+		{
+			sessionView.zoomToFit(scrollView.getWidth(), scrollView.getHeight());
+		}
 		scrollView.scrollTo(0, 0);
 	}
 
@@ -591,6 +599,7 @@ public class SessionInputManager
 
 		@Override public boolean onScaleBegin(ScaleGestureDetector detector)
 		{
+			scaleFactor = sessionView.getZoom();
 			scrollView.setScrollEnabled(false);
 			return true;
 		}
@@ -599,7 +608,8 @@ public class SessionInputManager
 		{
 			// calc scale factor
 			scaleFactor *= detector.getScaleFactor();
-			scaleFactor = Math.max(SessionView.MIN_SCALE_FACTOR,
+			float minScale = Math.min(0.1f, sessionView.getFitScale(scrollView.getWidth(), scrollView.getHeight()));
+			scaleFactor = Math.max(minScale,
 			                       Math.min(scaleFactor, SessionView.MAX_SCALE_FACTOR));
 			sessionView.setZoom(scaleFactor);
 

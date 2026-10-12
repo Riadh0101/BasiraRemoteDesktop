@@ -6,8 +6,7 @@
     <application
         android:name="com.freerdp.freerdpcore.application.GlobalApp"
         android:icon="@mipmap/ic_launcher"
-        android:label="Basira Remote Desktop"
-        android:extractNativeLibs="true"
+        android:label="Basira - Remote DC"
         android:resizeableActivity="true">
 
         <!-- Main activity -->

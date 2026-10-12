@@ -376,7 +376,7 @@ public class BookmarkBase implements Parcelable, Cloneable
 		domain = sharedPrefs.getString(keyDomain, "");
 
 		screenSettings.setColors(sharedPrefs.getInt(keyColors, 32));
-		screenSettings.setResolution(sharedPrefs.getString(keyResolution, "automatic"),
+		screenSettings.setResolution(sharedPrefs.getString(keyResolution, "fitscreen"),
 		                             sharedPrefs.getInt(keyWidth, 800),
 		                             sharedPrefs.getInt(keyHeight, 600));
 		screenSettings.setScale(sharedPrefs.getString(keyScaleMode, "100"),
@@ -599,7 +599,7 @@ public class BookmarkBase implements Parcelable, Cloneable
 				    return new ScreenSettings[size];
 			    }
 		    };
-		private int resolution = AUTOMATIC;
+		private int resolution = FITSCREEN;
 		private int colors = 32;
 		private int width = 0;
 		private int height = 0;
@@ -655,7 +655,7 @@ public class BookmarkBase implements Parcelable, Cloneable
 				case PREDEFINED:
 					break;
 				default:
-					resolution = AUTOMATIC;
+					resolution = FITSCREEN;
 					break;
 			}
 		}
@@ -675,15 +675,15 @@ public class BookmarkBase implements Parcelable, Cloneable
 				this.height = height;
 				this.resolution = CUSTOM;
 			}
-			else if (resolution.equalsIgnoreCase("fitscreen"))
+			else if (resolution.equalsIgnoreCase("automatic"))
 			{
 				this.width = this.height = 0;
-				this.resolution = FITSCREEN;
+				this.resolution = AUTOMATIC;
 			}
 			else
 			{
 				this.width = this.height = 0;
-				this.resolution = AUTOMATIC;
+				this.resolution = FITSCREEN;
 			}
 		}
 

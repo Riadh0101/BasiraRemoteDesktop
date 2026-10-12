@@ -38,6 +38,7 @@ import androidx.core.view.WindowInsetsCompat;
 import androidx.core.view.WindowInsetsControllerCompat;
 import androidx.lifecycle.ViewModelProvider;
 
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
@@ -86,7 +87,12 @@ public class SessionActivity extends AppCompatActivity
 				case GRAPHICS_CHANGED:
 				{
 					sessionView.onSurfaceChange(session);
+					if (screen_width > 0 && screen_height > 0)
+					{
+						sessionView.zoomToFit(screen_width, screen_height);
+					}
 					scrollView.requestLayout();
+					scrollView.post(() -> scrollView.scrollTo(0, 0));
 					break;
 				}
 				case REFRESH_SESSIONVIEW:
@@ -247,16 +253,23 @@ public class SessionActivity extends AppCompatActivity
 		    new OnGlobalLayoutListener() {
 			    @Override public void onGlobalLayout()
 			    {
-				    screen_width = scrollView.getWidth() - scrollView.getPaddingLeft() -
-				                   scrollView.getPaddingRight();
-				    screen_height = scrollView.getHeight() - scrollView.getPaddingTop() -
-				                    scrollView.getPaddingBottom();
+				    int w = scrollView.getWidth() - scrollView.getPaddingLeft() -
+				            scrollView.getPaddingRight();
+				    int h = scrollView.getHeight() - scrollView.getPaddingTop() -
+				            scrollView.getPaddingBottom();
+				    boolean sizeChanged = (w != screen_width || h != screen_height);
+				    screen_width = w;
+				    screen_height = h;
 
 				    // start session
 				    if (!sessionRunning && getIntent() != null)
 				    {
 					    processIntent(getIntent());
 					    sessionRunning = true;
+				    }
+				    else if (sizeChanged && sessionView != null && screen_width > 0 && screen_height > 0)
+				    {
+					    sessionView.zoomToFit(screen_width, screen_height);
 				    }
 			    }
 		    });
@@ -271,6 +284,22 @@ public class SessionActivity extends AppCompatActivity
 			{
 				if (inputManager != null)
 					inputManager.toggleTouchPointer();
+			}
+			@Override public void onToggleFitScreen()
+			{
+				if (sessionView != null && scrollView != null)
+				{
+					float fitScale = sessionView.getFitScale(screen_width, screen_height);
+					if (Math.abs(sessionView.getZoom() - fitScale) < 0.05f)
+					{
+						sessionView.setZoom(1.0f);
+					}
+					else
+					{
+						sessionView.zoomToFit(screen_width, screen_height);
+						scrollView.scrollTo(0, 0);
+					}
+				}
 			}
 			@Override public void onToggleKeyboard()
 			{
@@ -394,16 +423,24 @@ public class SessionActivity extends AppCompatActivity
 
 		hideSystemBars();
 
-		// screen_width/screen_height will be updated by the next onGlobalLayout callback;
-		if (session != null && session.getBookmark() != null &&
-		    session.getBookmark().getActiveScreenSettings().isFitScreen())
-		{
-			scrollView.post(() -> {
-				if (screen_width > 0 && screen_height > 0)
-					LibFreeRDP.sendMonitorLayout(session.getInstance(), screen_width,
-					                             screen_height);
-			});
-		}
+		scrollView.post(() -> {
+			int w = scrollView.getWidth() - scrollView.getPaddingLeft() - scrollView.getPaddingRight();
+			int h = scrollView.getHeight() - scrollView.getPaddingTop() - scrollView.getPaddingBottom();
+			if (w > 0 && h > 0)
+			{
+				screen_width = w;
+				screen_height = h;
+				if (sessionView != null)
+				{
+					sessionView.zoomToFit(w, h);
+					scrollView.scrollTo(0, 0);
+				}
+				if (session != null && session.getBookmark() != null)
+				{
+					LibFreeRDP.sendMonitorLayout(session.getInstance(), w, h);
+				}
+			}
+		});
 	}
 
 	private WindowInsetsCompat onWindowInsetsChanged(View rootView, WindowInsetsCompat windowInsets)
@@ -553,17 +590,20 @@ public class SessionActivity extends AppCompatActivity
 		BookmarkBase.ScreenSettings screenSettings =
 		    session.getBookmark().getActiveScreenSettings();
 		Log.v(TAG, "Screen Resolution: " + screenSettings.getResolutionString());
-		if (screenSettings.isAutomatic())
+		if (screen_width <= 0 || screen_height <= 0)
 		{
-			// Instead of enforcing obsolete ratios based on screen categories,
-			// directly map to actual device metrics without arbitrary multi-scaling.
-			screenSettings.setHeight(screen_height);
-			screenSettings.setWidth(screen_width);
+			DisplayMetrics dm = getResources().getDisplayMetrics();
+			screen_width = dm.widthPixels;
+			screen_height = dm.heightPixels;
 		}
-		if (screenSettings.isFitScreen())
+
+		int reqWidth = screen_width & ~1;
+		int reqHeight = screen_height & ~1;
+
+		if (screenSettings.isAutomatic() || screenSettings.isFitScreen())
 		{
-			screenSettings.setHeight(screen_height);
-			screenSettings.setWidth(screen_width);
+			screenSettings.setHeight(reqHeight);
+			screenSettings.setWidth(reqWidth);
 		}
 
 		// RECORD_AUDIO / CAMERA: only if the matching redirect is enabled.
@@ -647,7 +687,17 @@ public class SessionActivity extends AppCompatActivity
 		Log.v(TAG, "bindSession called");
 		session.setUIEventListener(this);
 		sessionView.onSurfaceChange(session);
+		if (screen_width > 0 && screen_height > 0)
+		{
+			sessionView.zoomToFit(screen_width, screen_height);
+		}
+		else
+		{
+			DisplayMetrics dm = getResources().getDisplayMetrics();
+			sessionView.zoomToFit(dm.widthPixels, dm.heightPixels);
+		}
 		scrollView.requestLayout();
+		scrollView.post(() -> scrollView.scrollTo(0, 0));
 
 		Bitmap surface = session.getSurface() != null ? session.getSurface().getBitmap() : null;
 		inputManager.attachSession(session.getInstance(), surface);
@@ -743,6 +793,13 @@ public class SessionActivity extends AppCompatActivity
 
 		if (inputManager != null)
 			inputManager.setBitmap(bitmap);
+
+		sessionView.post(() -> {
+			if (screen_width > 0 && screen_height > 0)
+			{
+				sessionView.zoomToFit(screen_width, screen_height);
+			}
+		});
 
 		if (session.getBookmark() == null)
 		{

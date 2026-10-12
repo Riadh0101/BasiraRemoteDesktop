@@ -79,3 +79,8 @@ find_library(jnigraphics-lib jnigraphics)
 target_link_libraries(
   ${MODULE_NAME} PRIVATE freerdp3-lib freerdp-client3-lib winpr3-lib ${log-lib} ${dl-lib} ${jnigraphics-lib}
 )
+
+target_link_options(
+  ${MODULE_NAME} PRIVATE "-Wl,-z,max-page-size=16384" "-Wl,-z,common-page-size=16384"
+)
+

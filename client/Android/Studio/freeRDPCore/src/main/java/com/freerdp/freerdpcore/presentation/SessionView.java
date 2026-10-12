@@ -41,8 +41,8 @@ import java.util.Stack;
 
 public class SessionView extends View
 {
-	public static final float MAX_SCALE_FACTOR = 3.0f;
-	public static final float MIN_SCALE_FACTOR = 0.75f;
+	public static final float MAX_SCALE_FACTOR = 4.0f;
+	public static final float MIN_SCALE_FACTOR = 0.1f;
 	private static final String TAG = "SessionView";
 	private static final float SCALE_FACTOR_DELTA = 0.0001f;
 	private static final float TOUCH_SCROLL_DELTA = 10.0f;
@@ -166,11 +166,29 @@ public class SessionView extends View
 		height = bitmap.getHeight();
 		surface.setBounds(0, 0, width, height);
 
-		setMinimumWidth(width);
-		setMinimumHeight(height);
+		setMinimumWidth(0);
+		setMinimumHeight(0);
 
 		requestLayout();
 		currentSession = session;
+	}
+
+	public float getFitScale(int viewportWidth, int viewportHeight)
+	{
+		if (width <= 0 || height <= 0 || viewportWidth <= 0 || viewportHeight <= 0)
+			return 1.0f;
+		float scaleX = (float)viewportWidth / (float)width;
+		float scaleY = (float)viewportHeight / (float)height;
+		return Math.min(scaleX, scaleY);
+	}
+
+	public void zoomToFit(int viewportWidth, int viewportHeight)
+	{
+		float fit = getFitScale(viewportWidth, viewportHeight);
+		if (fit > 0.001f)
+		{
+			setZoom(fit);
+		}
 	}
 
 	public float getZoom()

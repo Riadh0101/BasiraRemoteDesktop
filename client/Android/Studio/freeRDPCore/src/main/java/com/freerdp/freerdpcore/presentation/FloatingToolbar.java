@@ -24,6 +24,7 @@ public class FloatingToolbar
 	public interface Listener
 	{
 		void onToggleTouchPointer();
+		void onToggleFitScreen();
 		void onToggleKeyboard();
 	}
 
@@ -73,6 +74,7 @@ public class FloatingToolbar
 			buttons.getChildAt(i).setOnTouchListener(dragListener);
 
 		bindButton(activity, R.id.floating_toolbar_touch_pointer, listener::onToggleTouchPointer);
+		bindButton(activity, R.id.floating_toolbar_fit_screen, listener::onToggleFitScreen);
 		bindButton(activity, R.id.floating_toolbar_sys_keyboard, listener::onToggleKeyboard);
 
 		ViewTreeObserver vto = container.getViewTreeObserver();

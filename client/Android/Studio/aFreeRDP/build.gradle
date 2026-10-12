@@ -32,7 +32,7 @@ android {
     
     packagingOptions {
         jniLibs {
-            useLegacyPackaging true
+            useLegacyPackaging false
         }
     }
 
@@ -49,6 +49,8 @@ android {
             storeType "jks"
             v1SigningEnabled true
             v2SigningEnabled true
+            enableV3Signing = true
+            enableV4Signing = false
         }
     }
 

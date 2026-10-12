@@ -6,3 +6,8 @@ abi-checker
 client/Android/Studio/release.properties
 *.jks
 *.keystore
+
+apk/
+*.apk
+.vscode/
+*.jpeg

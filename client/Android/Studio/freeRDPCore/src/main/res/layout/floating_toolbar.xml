@@ -35,6 +35,15 @@
             android:src="@drawable/ic_touch_pointer" />
 
         <ImageButton
+            android:id="@+id/floating_toolbar_fit_screen"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:background="?android:attr/selectableItemBackground"
+            android:contentDescription="@string/menu_fit_screen"
+            app:tint="#FFFFFF"
+            android:src="@drawable/ic_resize" />
+
+        <ImageButton
             android:id="@+id/floating_toolbar_sys_keyboard"
             android:layout_width="32dp"
             android:layout_height="32dp"
