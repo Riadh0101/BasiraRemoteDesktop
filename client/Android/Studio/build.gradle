@@ -23,9 +23,9 @@ androidGitVersion {
 
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 Properties releaseProperties = new Properties()
-File file = new File('release.properties')
+File file = file('release.properties')
 if (file.canRead()) {
-    releaseProperties.load(new FileInputStream(file))
+    file.withInputStream { releaseProperties.load(it) }
 }
 ext {
     if (!hasProperty('RELEASE_STORE_FILE')) {
@@ -48,12 +48,12 @@ ext {
     universal = releaseProperties.get('BUILD_UNIVERSAL', true).toBoolean()
     splitArchs = releaseProperties.get('SPLIT_ARCHITECTURES', 'x86;x86_64;riscv64;armeabi-v7a;arm64-v8a').split(';')
     splitEnabled = releaseProperties.get('SPLIT_ENABLED', true).toBoolean()
-    ndkVersion = releaseProperties.get('NDK_VERSION', '26.1.10909125')
+    ndkVersion = releaseProperties.get('NDK_VERSION', '27.0.12077973')
     abiFilters = releaseProperties.get('ABI_FILTERS', 'arm64-v8a').split(';')
     cmakeArguments = releaseProperties.get('CMAKE_ARGUMENTS', '-DWITH_FFMPEG=OFF;-DWITH_OPENH264=OFF;-DWITH_OPUS=OFF;-DWITH_WEBP=OFF;-DWITH_JPEG=ON;-DWITH_PNG=ON;-DWITH_CJSON=OFF;-DWITH_OPENSSL=ON').split(';')
     cmakeVersion = releaseProperties.get('CMAKE_VERSION', '4.1.2')
     versionName = releaseProperties.get('VERSION_NAME', '')
-    versionCode = releaseProperties.get('VERSION_CODE', -1).toInteger()
+    versionCode = releaseProperties.get('VERSION_CODE', 1).toInteger()
     println '----------------- Project configuration -------------------'
     println 'RELEASE_STORE_FILE:      ' + RELEASE_STORE_FILE
     println 'RELEASE_KEY_ALIAS:       ' + RELEASE_KEY_ALIAS
